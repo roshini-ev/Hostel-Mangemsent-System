@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block title %}Students Away from Hostel{% endblock %}
+{% block page_title %}Hostel Outpass & Departure Roster{% endblock %}
+{% block breadcrumb %}Students Away{% endblock %}
+
+{% block content %}
+<!-- Administrative Guidance Card -->
+<div class="card" style="margin-bottom: 1.25rem;">
+  <div class="card-body" style="padding: 1.15rem 1.35rem;">
+    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+      <div>
+        <h3 style="font-size: 1.05rem; font-weight: 700; color: var(--text-main); margin: 0 0 4px 0;">
+          Outpass & Absence Roster
+        </h3>
+        <p style="font-size: 0.84rem; color: var(--text-secondary); margin: 0; line-height: 1.4;">
+          Students currently on approved leave with verified parent consent.
+        </p>
+      </div>
+
+      <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+        <a href="{{ url_for('admin_away_students', filter='active') }}" class="btn btn-sm {% if filter_mode == 'active' %}btn-primary{% else %}btn-outline{% endif %}">
+          Currently Away ({{ active_away_count }})
+        </a>
+        <a href="{{ url_for('admin_away_students', filter='all') }}" class="btn btn-sm {% if filter_mode == 'all' %}btn-primary{% else %}btn-outline{% endif %}">
+          All Approved Passes ({{ total_approved_count }})
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Main Table Card -->
+<div class="card">
+  <div class="card-header">
+    <div>
+      <h3 style="display: flex; align-items: center; gap: 0.5rem;">
+        <span>{% if filter_mode == 'active' %}Students Currently Away from Campus{% else %}All Approved Hostel Outpasses{% endif %}</span>
+        <span class="badge {% if filter_mode == 'active' %}badge-amber{% else %}badge-neutral{% endif %}">{{ students|length }} Records</span>
+      </h3>
+    </div>
+  </div>
+
+  <div class="card-body" style="padding: 0;">
+    <div class="table-container">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Student Details</th>
+            <th>Room</th>
+            <th>Leaving Schedule</th>
+            <th>Return Schedule</th>
+            <th>Parent Verification Log</th>
+            <th>Pass ID & Status</th>
+            <th>Live E-Outpass</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in students %}
+            <tr>
+              <td>
+                <div style="font-weight: 600; color: var(--text-main); font-size: 0.92rem;">
+                  {{ item.student_name }}
+                </div>
+                <div style="font-size: 0.78rem; color: var(--text-muted); display: flex; align-items: center; gap: 0.35rem; margin-top: 2px;">
+                  <code>{{ item.student_id }}</code>
+                  <span>&bull;</span>
+                  <span>Tel: {{ item.student_phone or '—' }}</span>
+                </div>
+                <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 3px;">
+                  <strong>Reason:</strong> {{ item.reason }}
+                </div>
+              </td>
+              <td>
+                <span class="badge badge-neutral" style="font-weight: 600; font-size: 0.8rem;">Room {{ item.room_number }}</span>
+                <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 3px;">{{ item.leave_type|replace('Leave', 'Outpass') }}</div>
+              </td>
+              <td>
+                <div style="font-weight: 600; font-size: 0.85rem; color: var(--text-main);">{{ item.start_date }}</div>
+                <div style="font-size: 0.78rem; color: var(--text-secondary); display: flex; align-items: center; gap: 3px; margin-top: 2px;">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  <span>Dep: {{ item.departure_time or '09:00 AM' }}</span>
+                </div>
+              </td>
+              <td>
+                <div style="font-weight: 600; font-size: 0.85rem; color: var(--text-main);">{{ item.end_date }}</div>
+                <div style="font-size: 0.78rem; color: var(--text-secondary); display: flex; align-items: center; gap: 3px; margin-top: 2px;">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  <span>Exp: {{ item.return_time or '06:00 PM' }}</span>
+                </div>
+              </td>
+              <td style="max-width: 240px;">
+                <div style="font-size: 0.8rem; font-weight: 600; color: #047857; display: flex; align-items: center; gap: 4px;">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                  <span>{{ item.parent_verification_status or 'Verified via Phone Call' }}</span>
+                </div>
+                <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">
+                  {{ item.parent_name or 'Parent' }} ({{ item.parent_phone or '—' }})
+                </div>
+                {% if item.parent_remarks %}
+                  <div style="font-size: 0.73rem; color: var(--text-secondary); font-style: italic; background: #f8fafc; padding: 4px 6px; border-radius: 4px; margin-top: 4px; border: 1px solid var(--border-subtle);">
+                    "{{ item.parent_remarks }}"
+                  </div>
+                {% endif %}
+              </td>
+              <td>
+                {% if item.is_away %}
+                  <span class="badge badge-amber" style="font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">
+                    <span class="badge-dot" style="background: #d97706;"></span> Currently Away
+                  </span>
+                {% else %}
+                  <span class="badge badge-success" style="font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">
+                    <span class="badge-dot" style="background: #10b981;"></span> Approved
+                  </span>
+                {% endif %}
+                <div style="margin-top: 4px;">
+                  <code style="font-size: 0.74rem; font-weight: 600; color: var(--primary-navy);">{{ item.pass_code or 'NO-CODE' }}</code>
+                </div>
+              </td>
+              <td>
+                {% if item.pass_code %}
+                  <a href="{{ url_for('view_e_outpass', pass_code=item.pass_code) }}" class="btn btn-sm btn-primary" style="display: inline-flex; align-items: center; gap: 5px; font-size: 0.8rem; padding: 4px 10px; background: #0f172a; border-color: #0f172a;" target="_blank">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                    <span>View Pass</span>
+                  </a>
+                {% else %}
+                  <span style="font-size: 0.78rem; color: var(--text-muted);">&mdash;</span>
+                {% endif %}
+              </td>
+            </tr>
+          {% else %}
+            <tr>
+              <td colspan="7" class="empty-state" style="padding: 2.5rem 1rem; text-align: center; color: var(--text-muted);">
+                <div style="font-size: 1.1rem; font-weight: 600; margin-bottom: 4px; color: var(--text-main);">No absent residents found</div>
+                <div>All registered students are inside the hostel premises.</div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,312 @@
+{% extends "base.html" %}
+
+{% block title %}Outpass Requests & Parent Verification{% endblock %}
+{% block page_title %}Outpass Requests & Parent Verification{% endblock %}
+{% block breadcrumb %}Outpass Requests{% endblock %}
+
+{% block content %}
+<div class="card" style="margin-bottom: 1.25rem;">
+  <div class="card-body" style="padding: 1.15rem 1.35rem;">
+    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+      <div>
+        <h3 style="font-size: 1.05rem; font-weight: 700; color: var(--text-main); margin: 0 0 4px 0;">
+          Parent Verification & Approval
+        </h3>
+        <p style="font-size: 0.84rem; color: var(--text-secondary); margin: 0; line-height: 1.4;">
+          Call parent/guardian to confirm outpass before approving. Approval generates the live E-Outpass.
+        </p>
+      </div>
+
+      <div style="display: flex; gap: 0.4rem; flex-wrap: wrap;">
+        <a href="{{ url_for('warden_leaves', status='all') }}" class="btn btn-sm {% if selected_status == 'all' %}btn-primary{% else %}btn-outline{% endif %}">
+          All ({{ leaves|length }})
+        </a>
+        <a href="{{ url_for('warden_leaves', status='pending') }}" class="btn btn-sm {% if selected_status == 'pending' %}btn-primary{% else %}btn-outline{% endif %}">
+          Pending
+        </a>
+        <a href="{{ url_for('warden_leaves', status='approved') }}" class="btn btn-sm {% if selected_status == 'approved' %}btn-primary{% else %}btn-outline{% endif %}">
+          Approved
+        </a>
+        <a href="{{ url_for('warden_leaves', status='rejected') }}" class="btn btn-sm {% if selected_status == 'rejected' %}btn-primary{% else %}btn-outline{% endif %}">
+          Rejected
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <div>
+      <h3 style="display: flex; align-items: center; gap: 0.5rem;">
+        <span>Outpass Applications List</span>
+        <span class="badge badge-neutral">{{ leaves|length }}</span>
+      </h3>
+    </div>
+  </div>
+
+  <div class="card-body" style="padding: 0;">
+    <div class="table-container">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Student</th>
+            <th>Room</th>
+            <th>Departure & Return Schedule</th>
+            <th>Reason</th>
+            <th>Parent Contact & Verification</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for leave in leaves %}
+            <tr {% if leave.status == 'Pending' %}style="background-color: #fffdf5; font-weight: 500;"{% endif %}>
+              <td>
+                <div style="font-weight: 700; color: var(--text-main); font-size: 0.92rem;">{{ leave.student_name }}</div>
+                <div style="font-size: 0.76rem; color: var(--text-muted); display: flex; align-items: center; gap: 0.35rem; margin-top: 2px;">
+                  <code>{{ leave.student_id }}</code>
+                  <span>&bull;</span>
+                  <span>{{ leave.student_phone or 'No Tel' }}</span>
+                </div>
+                <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 2px;">Applied: {{ leave.applied_on }}</div>
+              </td>
+              <td>
+                <span class="badge badge-neutral" style="font-weight: 600;">Room {{ leave.room_number }}</span>
+                <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 2px;">{{ leave.leave_type|replace('Leave', 'Outpass') }}</div>
+              </td>
+              <td>
+                <div style="font-size: 0.82rem; font-weight: 600; color: #1e3a8a;">
+                  Leave: {{ leave.start_date }}
+                </div>
+                <div style="font-size: 0.74rem; color: var(--text-secondary); margin-bottom: 4px;">
+                  Time: {{ leave.departure_time or '09:00 AM' }}
+                </div>
+                <div style="font-size: 0.82rem; font-weight: 600; color: #92400e;">
+                  Return: {{ leave.end_date }}
+                </div>
+                <div style="font-size: 0.74rem; color: var(--text-secondary);">
+                  Time: {{ leave.return_time or '06:00 PM' }}
+                </div>
+              </td>
+              <td style="max-width: 200px; font-size: 0.82rem; color: var(--text-secondary); line-height: 1.4;">
+                {{ leave.reason }}
+              </td>
+              <td style="max-width: 240px;">
+                <div style="font-weight: 600; font-size: 0.83rem; color: var(--text-main);">
+                  {{ leave.parent_name or 'Parent/Guardian' }}
+                </div>
+                <div style="font-size: 0.78rem; color: #1e40af; margin-top: 2px; display: flex; align-items: center; gap: 4px;">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                  <a href="tel:{{ leave.parent_phone }}" style="font-weight: 600; text-decoration: underline;">{{ leave.parent_phone or '—' }}</a>
+                </div>
+                <div style="margin-top: 4px;">
+                  {% if leave.status == 'Approved' %}
+                    <span class="badge badge-success" style="font-size: 0.7rem;">&check; Verified with Parent</span>
+                  {% elif leave.status == 'Pending' %}
+                    <span class="badge badge-amber" style="font-size: 0.7rem;">&#9742; Call Required</span>
+                  {% else %}
+                    <span class="badge badge-danger" style="font-size: 0.7rem;">No Consent</span>
+                  {% endif %}
+                </div>
+                {% if leave.parent_remarks %}
+                  <div style="font-size: 0.72rem; color: var(--text-secondary); margin-top: 3px; font-style: italic; background: #f8fafc; padding: 2px 5px; border-radius: 3px;">
+                    "{{ leave.parent_remarks }}"
+                  </div>
+                {% endif %}
+              </td>
+              <td>
+                {% if leave.status == 'Approved' %}
+                  <span class="badge badge-success"><span class="badge-dot"></span> Approved</span>
+                  {% if leave.pass_code %}
+                    <div style="margin-top: 4px;">
+                      <code style="font-size: 0.72rem; font-weight: 700; color: var(--primary-navy);">{{ leave.pass_code }}</code>
+                    </div>
+                  {% endif %}
+                {% elif leave.status == 'Pending' %}
+                  <span class="badge badge-amber"><span class="badge-dot"></span> Pending Review</span>
+                {% elif leave.status == 'Rejected' %}
+                  <span class="badge badge-danger"><span class="badge-dot"></span> Rejected</span>
+                {% else %}
+                  <span class="badge badge-neutral">{{ leave.status }}</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if leave.status == 'Pending' %}
+                  <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+                    <button type="button" class="btn btn-primary btn-sm" onclick="openVerificationModal({{ leave.id }}, '{{ leave.student_name }}', '{{ leave.student_id }}', '{{ leave.room_number }}', '{{ leave.parent_name }}', '{{ leave.parent_phone }}', '{{ leave.start_date }}', '{{ leave.departure_time or '09:00 AM' }}', '{{ leave.end_date }}', '{{ leave.return_time or '06:00 PM' }}', '{{ leave.reason }}')" style="font-size: 0.78rem; padding: 4px 8px; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                      <span>Verify & Approve</span>
+                    </button>
+
+                    <button type="button" class="btn btn-outline btn-sm" onclick="openRejectModal({{ leave.id }}, '{{ leave.student_name }}')" style="font-size: 0.75rem; padding: 3px 8px; color: #dc2626; border-color: #fca5a5;">
+                      Reject
+                    </button>
+                  </div>
+                {% elif leave.status == 'Approved' and leave.pass_code %}
+                  <a href="{{ url_for('view_e_outpass', pass_code=leave.pass_code) }}" class="btn btn-sm btn-outline" style="font-size: 0.78rem; padding: 4px 8px; color: #047857; border-color: #a7f3d0; background: #ecfdf5; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;" target="_blank">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    <span>View E-Outpass</span>
+                  </a>
+                {% else %}
+                  <span style="font-size: 0.8rem; color: var(--text-muted);">&mdash;</span>
+                {% endif %}
+              </td>
+            </tr>
+          {% else %}
+            <tr>
+              <td colspan="7" class="empty-state" style="padding: 2.5rem 1rem; text-align: center; color: var(--text-muted);">
+                No outpass requests found for the selected view.
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Parent Verification & Approval -->
+<div id="verify-modal" style="display: none; position: fixed; inset: 0; z-index: 1050; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(2px); align-items: center; justify-content: center; padding: 1rem;">
+  <div class="card" style="max-width: 580px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.25); border: 2px solid var(--primary-navy);">
+    <div class="card-header" style="background: var(--primary-navy); color: white;">
+      <div>
+        <h3 style="margin: 0; font-size: 1.05rem; color: white; display: flex; align-items: center; gap: 8px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          <span>Parent Telephone Verification</span>
+        </h3>
+        <div style="font-size: 0.75rem; color: #93c5fd; margin-top: 2px;">Direct confirmation required prior to digital pass generation</div>
+      </div>
+      <button type="button" onclick="closeVerificationModal()" style="background: transparent; border: none; color: white; font-size: 1.4rem; cursor: pointer; line-height: 1;">&times;</button>
+    </div>
+
+    <div class="card-body" style="padding: 1.35rem;">
+      <form id="verify-form" method="POST" action="">
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: var(--radius-sm); padding: 1rem; margin-bottom: 1.15rem;">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 0.4rem;">
+            <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-main);" id="v-student-name"></div>
+            <div style="font-size: 0.8rem;"><code id="v-student-id"></code> &bull; <strong id="v-room"></strong></div>
+          </div>
+          <div style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 0.35rem;">
+            <strong>Schedule:</strong> Leaving <span id="v-depart" style="font-weight: 600; color: #1e3a8a;"></span> to Returning <span id="v-return" style="font-weight: 600; color: #92400e;"></span>
+          </div>
+          <div style="font-size: 0.82rem; color: var(--text-secondary);">
+            <strong>Reason:</strong> <span id="v-reason"></span>
+          </div>
+        </div>
+
+        <!-- Parent Telephone Contact Box -->
+        <div style="background: #eff6ff; border: 1.5px solid #bfdbfe; border-radius: var(--radius-sm); padding: 1rem; margin-bottom: 1.15rem;">
+          <div style="font-size: 0.75rem; font-weight: 700; color: #1e40af; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.35rem;">
+            Registered Parent / Guardian Details
+          </div>
+          <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;">
+            <div>
+              <div style="font-weight: 700; font-size: 0.95rem; color: #1e3a8a;" id="v-parent-name"></div>
+              <div style="font-size: 0.82rem; color: #3b82f6; font-weight: 600;" id="v-parent-phone"></div>
+            </div>
+            <div>
+              <a id="v-call-link" href="#" class="btn btn-sm btn-primary" style="background: #2563eb; border-color: #2563eb; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 5px;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                <span>Dial Parent Now</span>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 1.25rem;">
+          <label class="form-label" style="font-weight: 600; font-size: 0.85rem;">
+            Warden's Verification Remarks & Consent Log <span style="color: #dc2626;">*</span>
+          </label>
+          <textarea class="form-control" name="parent_remarks" id="v-remarks" rows="3" required placeholder="e.g., Spoke with mother Mrs. Sharma; verified wedding travel and train departure at 10 AM. Parental consent approved."></textarea>
+          <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 3px;">
+            This remark will be stamped onto the student's tamper-proof E-Outpass.
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 0.5rem;">
+          <button type="button" class="btn btn-outline btn-sm" onclick="closeVerificationModal()">
+            Cancel
+          </button>
+          <button type="submit" class="btn btn-primary btn-sm" style="background: #059669; border-color: #059669; font-weight: 600;">
+            &check; Confirm Consent & Issue Digital E-Outpass
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Reject Outpass -->
+<div id="reject-modal" style="display: none; position: fixed; inset: 0; z-index: 1050; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(2px); align-items: center; justify-content: center; padding: 1rem;">
+  <div class="card" style="max-width: 480px; width: 100%; border-top: 4px solid #dc2626;">
+    <div class="card-header">
+      <h3 style="margin: 0; font-size: 1.05rem; color: #dc2626;">Reject Outpass Application</h3>
+      <button type="button" onclick="closeRejectModal()" style="background: transparent; border: none; font-size: 1.4rem; cursor: pointer;">&times;</button>
+    </div>
+    <div class="card-body">
+      <form id="reject-form" method="POST" action="">
+        <div style="font-size: 0.88rem; margin-bottom: 0.75rem;">
+          Reject outpass application for <strong id="r-student-name"></strong>?
+        </div>
+        <div class="form-group" style="margin-bottom: 1.25rem;">
+          <label class="form-label" style="font-size: 0.82rem;">Reason for Rejection</label>
+          <textarea class="form-control" name="reject_reason" rows="3" placeholder="e.g. Parent refused permission over telephone call / Attendance insufficient..." required></textarea>
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 0.5rem;">
+          <button type="button" class="btn btn-outline btn-sm" onclick="closeRejectModal()">Cancel</button>
+          <button type="submit" class="btn btn-sm" style="background: #dc2626; color: white; border: none;">Confirm Rejection</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function openVerificationModal(leaveId, name, studentId, room, parentName, parentPhone, startDate, depTime, endDate, retTime, reason) {
+  const modal = document.getElementById('verify-modal');
+  const form = document.getElementById('verify-form');
+  
+  form.action = `/warden/leave/${leaveId}/approve`;
+  document.getElementById('v-student-name').textContent = name;
+  document.getElementById('v-student-id').textContent = studentId;
+  document.getElementById('v-room').textContent = 'Room ' + room;
+  document.getElementById('v-parent-name').textContent = parentName || 'Parent / Guardian';
+  document.getElementById('v-parent-phone').textContent = parentPhone || 'No Phone Registered';
+  document.getElementById('v-call-link').href = 'tel:' + (parentPhone || '');
+  document.getElementById('v-depart').textContent = `${startDate} (${depTime})`;
+  document.getElementById('v-return').textContent = `${endDate} (${retTime})`;
+  document.getElementById('v-reason').textContent = reason;
+  
+  document.getElementById('v-remarks').value = `Spoke with ${parentName || 'parent'} via phone. Confirmed departure on ${startDate} and travel reason. Parental consent granted.`;
+  
+  modal.style.display = 'flex';
+}
+
+function closeVerificationModal() {
+  document.getElementById('verify-modal').style.display = 'none';
+}
+
+function openRejectModal(leaveId, name) {
+  const modal = document.getElementById('reject-modal');
+  const form = document.getElementById('reject-form');
+  form.action = `/warden/leave/${leaveId}/reject`;
+  document.getElementById('r-student-name').textContent = name;
+  modal.style.display = 'flex';
+}
+
+function closeRejectModal() {
+  document.getElementById('reject-modal').style.display = 'none';
+}
+
+// Close on background click
+window.addEventListener('click', (e) => {
+  const vModal = document.getElementById('verify-modal');
+  const rModal = document.getElementById('reject-modal');
+  if (e.target === vModal) closeVerificationModal();
+  if (e.target === rModal) closeRejectModal();
+});
+</script>
+{% endblock %}

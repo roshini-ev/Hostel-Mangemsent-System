@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Profile{% endblock %}
+{% block page_title %}Admin Profile{% endblock %}
+{% block breadcrumb %}Profile{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 800px; margin: 0 auto;">
+  <div class="card-header">
+    <div style="display: flex; align-items: center; gap: 1rem;">
+      <div class="collegiate-avatar" style="width: 48px; height: 48px; font-size: 1.2rem; background: #0f172a; color: #f8fafc;">
+        A
+      </div>
+      <div>
+        <h3 style="margin: 0; font-size: 1.15rem;">Prof. S. Ranganathan</h3>
+        <p style="margin: 0; font-size: 0.85rem; color: var(--text-secondary);">Chief Administrator</p>
+      </div>
+    </div>
+    <span class="badge badge-success"><span class="badge-dot"></span> Active</span>
+  </div>
+
+  <div class="card-body">
+    <h4 style="font-size: 0.95rem; font-weight: 600; color: var(--text-main); margin-bottom: 0.75rem; border-bottom: 1px solid var(--border-subtle); padding-bottom: 0.5rem;">
+      Administrative Details
+    </h4>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+      <div>
+        <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; margin-bottom: 0.2rem;">Designation</div>
+        <div style="font-size: 0.95rem; font-weight: 500; color: var(--text-main);">Chief Administrator & Director of Student Welfare</div>
+      </div>
+      <div>
+        <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; margin-bottom: 0.2rem;">Employee ID</div>
+        <div style="font-size: 0.95rem; font-weight: 500; color: var(--text-main);"><code>EMP-ADMIN-007</code></div>
+      </div>
+      <div>
+        <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; margin-bottom: 0.2rem;">Campus</div>
+        <div style="font-size: 0.95rem; font-weight: 500; color: var(--text-main);">RIT Main Campus</div>
+      </div>
+      <div>
+        <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; margin-bottom: 0.2rem;">Office</div>
+        <div style="font-size: 0.95rem; font-weight: 500; color: var(--text-main);">Administration Block, Room 201</div>
+      </div>
+      <div>
+        <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; margin-bottom: 0.2rem;">Phone</div>
+        <div style="font-size: 0.95rem; font-weight: 500; color: var(--text-main);">+91 99881 22313</div>
+      </div>
+      <div>
+        <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; margin-bottom: 0.2rem;">Email</div>
+        <div style="font-size: 0.95rem; font-weight: 500; color: var(--text-main);">admin@rit.edu</div>
+      </div>
+    </div>
+
+    <h4 style="font-size: 0.95rem; font-weight: 600; color: var(--text-main); margin-bottom: 0.75rem; border-bottom: 1px solid var(--border-subtle); padding-bottom: 0.5rem;">
+      Administrative Responsibilities
+    </h4>
+    <div style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6;">
+      <ul style="margin: 0; padding-left: 1.25rem;">
+        <li>Review resident welfare operations and hostel compliance.</li>
+        <li>Approve escalations involving SLA breaches or operations issues.</li>
+        <li>Monitor away rosters, notice circulation, and student support services.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock %}

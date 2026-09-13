@@ -1,0 +1,264 @@
+{% extends "base.html" %}
+
+{% block title %}Administrator Dashboard{% endblock %}
+{% block page_title %}Administrator Control Center{% endblock %}
+{% block breadcrumb %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<!-- Overdue Complaints SLA Alert Banner (If Any) -->
+{% if overdue_complaints|length > 0 %}
+<div class="card" style="margin-bottom: 1.25rem; background: #fff1f2; border: 1px solid #fecdd3; border-left: 5px solid #e11d48;">
+  <div class="card-body" style="padding: 1rem 1.25rem;">
+    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem;">
+      <div style="display: flex; align-items: flex-start; gap: 0.75rem;">
+        <div style="color: #e11d48; margin-top: 2px;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        </div>
+        <div>
+          <div style="font-weight: 700; color: #9f1239; font-size: 0.95rem;">
+            SLA Alert: {{ overdue_complaints|length }} complaint(s) exceeded the 24-hour resolution window.
+          </div>
+          <div style="font-size: 0.83rem; color: #be123c; margin-top: 3px;">
+            Warden Dr. Venkatesh has been notified. Review or escalate below.
+          </div>
+        </div>
+      </div>
+      <div>
+        <a href="{{ url_for('admin_complaints', filter='overdue') }}" class="btn btn-sm" style="background: #e11d48; color: white; border: none; font-weight: 600;">
+          Inspect Overdue &rarr;
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- Key Metrics Grid -->
+<div class="stats-grid" style="margin-bottom: 1.25rem;">
+  <div class="stat-card">
+    <div class="stat-info">
+      <div class="label">Total Residents</div>
+      <div class="value">{{ total_residents }}</div>
+      <div class="meta"><span>58 Hostel Rooms &bull; 1 Block</span></div>
+    </div>
+  </div>
+
+  <div class="stat-card" style="border-top: 3px solid #d97706;">
+    <div class="stat-info">
+      <div class="label">Currently Away</div>
+      <div class="value" style="color: #b45309;">{{ away_students|length }}</div>
+      <div class="meta">
+        <span class="badge badge-amber" style="font-weight: 600;">Verified Outpass</span>
+        <a href="{{ url_for('admin_away_students') }}" style="margin-left: 0.4rem; font-size: 0.78rem;">View Roster &rarr;</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="stat-card" style="border-top: 3px solid {% if overdue_complaints|length > 0 %}#dc2626{% else %}#10b981{% endif %};">
+    <div class="stat-info">
+      <div class="label">Overdue Complaints</div>
+      <div class="value" style="color: {% if overdue_complaints|length > 0 %}#dc2626{% else %}#059669{% endif %};">
+        {{ overdue_complaints|length }}
+      </div>
+      <div class="meta">
+        {% if overdue_complaints|length > 0 %}
+          <span class="badge badge-danger">Needs Warden Action</span>
+        {% else %}
+          <span class="badge badge-success">SLA Met (0 Overdue)</span>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-info">
+      <div class="label">Warden Notices</div>
+      <div class="value">{{ announcements|length }}</div>
+      <div class="meta">
+        <a href="{{ url_for('admin_announcements') }}">Manage Notices &rarr;</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 2-Column Administrative Control Sections -->
+<div class="grid-2" style="margin-bottom: 1.25rem;">
+  <!-- Left Side: Students Away From Hostel -->
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <h3 style="display: flex; align-items: center; gap: 0.5rem;">
+          <span>Students Currently Away</span>
+          <span class="badge badge-amber">{{ away_students|length }} Active</span>
+        </h3>
+      </div>
+      <a href="{{ url_for('admin_away_students') }}" class="btn btn-outline btn-sm">Full Roster &rarr;</a>
+    </div>
+    <div class="card-body" style="padding: 0;">
+      <div class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Student</th>
+              <th>Room</th>
+              <th>Departed</th>
+              <th>Expected Return</th>
+              <th>E-Outpass</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in away_students %}
+              <tr>
+                <td>
+                  <div style="font-weight: 600; color: var(--text-main);">{{ item.student_name }}</div>
+                  <code style="font-size: 0.75rem;">{{ item.student_id }}</code>
+                </td>
+                <td>
+                  <span class="badge badge-neutral" style="font-weight: 600;">Room {{ item.room_number }}</span>
+                </td>
+                <td>
+                  <div style="font-size: 0.82rem; font-weight: 500;">{{ item.start_date }}</div>
+                  <div style="font-size: 0.72rem; color: var(--text-muted);">{{ item.departure_time }}</div>
+                </td>
+                <td>
+                  <div style="font-size: 0.82rem; font-weight: 500;">{{ item.end_date }}</div>
+                  <div style="font-size: 0.72rem; color: var(--text-muted);">{{ item.return_time }}</div>
+                </td>
+                <td>
+                  {% if item.pass_code %}
+                    <a href="{{ url_for('view_e_outpass', pass_code=item.pass_code) }}" class="btn btn-sm btn-outline" style="padding: 3px 8px; font-size: 0.78rem; color: #047857; border-color: #a7f3d0; background: #ecfdf5; display: inline-flex; align-items: center; gap: 4px;" target="_blank">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                      <span>{{ item.pass_code }}</span>
+                    </a>
+                  {% else %}
+                    <span style="font-size: 0.75rem; color: var(--text-muted);">&mdash;</span>
+                  {% endif %}
+                </td>
+              </tr>
+            {% else %}
+              <tr>
+                <td colspan="5" class="empty-state" style="padding: 1.5rem; text-align: center; color: var(--text-muted);">
+                  All students are presently accounted for on campus. No active outpasses.
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Side: Overdue Complaints (>24h SLA) -->
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <h3 style="display: flex; align-items: center; gap: 0.5rem;">
+          <span>Complaints Exceeding SLA</span>
+          {% if overdue_complaints|length > 0 %}
+            <span class="badge badge-danger">{{ overdue_complaints|length }} Delayed</span>
+          {% else %}
+            <span class="badge badge-success">0 Delayed</span>
+          {% endif %}
+        </h3>
+      </div>
+      <a href="{{ url_for('admin_complaints') }}" class="btn btn-outline btn-sm">All Complaints &rarr;</a>
+    </div>
+    <div class="card-body" style="padding: 0;">
+      <div class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Ticket</th>
+              <th>Category</th>
+              <th>Latency / Age</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for c in overdue_complaints %}
+              <tr>
+                <td>
+                  <div style="font-weight: 600; font-size: 0.85rem;">{{ c.title }}</div>
+                  <div style="font-size: 0.72rem; color: var(--text-muted);">Room {{ c.room_number }} &bull; {{ c.student_name }}</div>
+                </td>
+                <td>
+                  <span class="badge badge-neutral" style="font-size: 0.75rem;">{{ c.category }}</span>
+                </td>
+                <td>
+                  <span style="color: #dc2626; font-weight: 700; font-size: 0.82rem;">{{ c.lag_str }}</span>
+                  <div style="font-size: 0.7rem; color: var(--text-muted);">Filed: {{ c.created_at }}</div>
+                </td>
+                <td>
+                  {% if c.escalated_by_admin %}
+                    <span class="badge badge-danger" style="font-size: 0.72rem;">Escalated</span>
+                  {% else %}
+                    <span class="badge badge-amber" style="font-size: 0.72rem;">{{ c.status }}</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if not c.escalated_by_admin %}
+                    <form method="POST" action="{{ url_for('admin_escalate_complaint', complaint_id=c.id) }}" style="display: inline;">
+                      <button type="submit" class="btn btn-sm btn-outline" style="padding: 3px 8px; font-size: 0.76rem; color: #dc2626; border-color: #fca5a5;">
+                        Escalate
+                      </button>
+                    </form>
+                  {% else %}
+                    <span style="font-size: 0.75rem; color: #059669; font-weight: 600;">Notified</span>
+                  {% endif %}
+                </td>
+              </tr>
+            {% else %}
+              <tr>
+                <td colspan="5" class="empty-state" style="padding: 1.5rem; text-align: center; color: var(--text-muted);">
+                  Excellent! Zero complaints have exceeded the 24-hour Warden resolution SLA.
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Announcements Moderation Section -->
+<div class="card">
+  <div class="card-header">
+    <div>
+      <h3 style="display: flex; align-items: center; gap: 0.5rem;">
+        <span>Active Hostel Notices by Warden</span>
+        <span class="badge badge-neutral">{{ announcements|length }}</span>
+      </h3>
+    </div>
+    <a href="{{ url_for('admin_announcements') }}" class="btn btn-outline btn-sm">Manage Notices &rarr;</a>
+  </div>
+  <div class="card-body">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1rem;">
+      {% for ann in announcements[:3] %}
+        <div style="padding: 1rem 1.15rem; border: 1px solid {% if ann.is_important %}#fca5a5{% else %}var(--border-subtle){% endif %}; border-left: 4px solid {% if ann.is_important %}#dc2626{% else %}var(--primary-navy){% endif %}; border-radius: var(--radius-sm); background: {% if ann.is_important %}#fff5f5{% else %}var(--bg-surface-subtle){% endif %}; position: relative;">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.4rem; gap: 0.5rem;">
+            <div style="display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap;">
+              <h4 style="font-size: 0.92rem; font-weight: 600; color: var(--text-main); margin: 0;">{{ ann.title }}</h4>
+              {% if ann.is_important %}
+                <span class="badge badge-danger" style="font-size: 0.68rem;">Important</span>
+              {% endif %}
+            </div>
+            <span style="font-size: 0.72rem; color: var(--text-muted);">{{ ann.date }}</span>
+          </div>
+          <p style="font-size: 0.83rem; color: var(--text-secondary); line-height: 1.45; margin: 0 0 0.75rem 0;">
+            {{ ann.description }}
+          </p>
+          <div style="display: flex; justify-content: flex-end;">
+            <form method="POST" action="{{ url_for('admin_delete_announcement', ann_id=ann.id) }}" onsubmit="return confirm('Remove announcement \'{{ ann.title }}\'?');">
+              <button type="submit" class="btn btn-outline btn-sm" style="padding: 2px 8px; font-size: 0.75rem; color: #dc2626; border-color: #fca5a5;">
+                Delete Notice
+              </button>
+            </form>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}
